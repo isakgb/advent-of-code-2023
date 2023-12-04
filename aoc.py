@@ -45,3 +45,22 @@ def apply(data, func):
         return {k: apply(v, func) for k, v in data.items()}
     else:
         return func(data)
+
+
+def dir8(x, y):
+    yield x+1, y
+    yield x-1, y
+    yield x, y+1
+    yield x, y-1
+    yield x+1, y+1
+    yield x-1, y-1
+    yield x+1, y-1
+    yield x-1, y+1
+
+
+def dir4(x, y):
+    yield x+1, y
+    yield x-1, y
+    yield x, y+1
+    yield x, y-1
+
