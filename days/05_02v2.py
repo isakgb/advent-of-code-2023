@@ -1,5 +1,5 @@
 from aoc import get_input, split_double_newline, ints, floats, apply, dir8, dir4
-
+from typing import List
 
 
 groups = get_input(5).strip()
@@ -28,6 +28,76 @@ def sort_rule(rule):
 rules = [sort_rule(rule) for rule in rules]
 
 
+class Rule:
+    def __init__(self, dst, src, length):
+        self.dst = dst
+        self.src = src
+        self.length = length
+
+    def __repr__(self):
+        return f"Rule(dst={self.dst}, src={self.src}, len={self.length})"
+
+
+class Range:
+    def __init__(self, start, length):
+        self.start = start
+        self.length = length
+
+    def apply_rule(self, rule: Rule) -> 'RangeList':
+        result = RangeList([])
+
+        if self.start + self.length <= rule.src:
+            result.ranges.append(Range(self.start, self.length))
+            return result
+        if self.start >= rule.src + rule.length:
+            result.ranges.append(Range(self.start, self.length))
+            return result
+        if self.start < rule.src:
+            preoverlap = rule.src - self.start
+            result.ranges.append(Range(self.start, preoverlap))
+            overlap = min(self.length - preoverlap, rule.length)
+            result.ranges.append(Range(rule.dst, self.start + preoverlap + overlap - rule.src))
+            self.length -= preoverlap + overlap
+            self.start += preoverlap + overlap
+            if self.length > 0:
+                print("self.length > 0", self.start, self.length, rule.src + rule.length)
+
+            return result
+        result.ranges.append(Range(self.start, self.length))
+        return result
+
+    def __repr__(self):
+        return f"Range(start={self.start}, len={self.length})"
+
+
+class RangeList:
+    def __init__(self, ranges):
+        self.ranges = ranges
+
+    def add_ruleset(self, rules: List[Rule]):
+        pass
+
+    def __repr__(self):
+        return f"RangeList({self.ranges})"
+
+    def __len__(self):
+        return sum(r.length for r in self.ranges)
+
+
+print(rules)
+rules = [[Rule(dst, src, length) for dst, src, length in mappings] for mappings in rules]
+print(rules)
+
+seed_parsed = []
+
+for i in range(len(seeds)//2):
+    si = i*2
+    start = seeds[si]
+    length = seeds[si+1]
+    seed_parsed.append(Range(start, length))
+
+print(seed_parsed)
+print(seed_parsed[0].apply_rule(rules[0][0]))
 def location_number_range(n):
 
     for rule in rules:
@@ -86,11 +156,7 @@ print(seeds)
 
 seed_parsed = []
 
-for i in range(len(seeds)//2):
-    si = i*2
-    start = seeds[si]
-    length = seeds[si+1]
-    seed_parsed.append([start, length])
+
 
 lowest = location_number_range(seed_parsed)
 
